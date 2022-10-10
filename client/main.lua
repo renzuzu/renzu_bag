@@ -1,0 +1,196 @@
+ESX = exports['es_extended']:getSharedObject()
+local loaded = false
+Citizen.CreateThread(function()
+	PlayerData = ESX.GetPlayerData()
+	player = LocalPlayer.state
+	Wait(2000)
+	loaded = ESX.PlayerLoaded
+end)
+
+RegisterNetEvent('esx:playerLoaded')
+AddEventHandler('esx:playerLoaded', function(playerData)
+    loaded = true
+end)
+
+RegisterNetEvent('esx:setJob')
+AddEventHandler('esx:setJob', function(job)
+	PlayerData.job = job
+	loaded = true
+end)
+
+local stash = {}
+AddStateBagChangeHandler('bag' --[[key filter]], nil --[[bag filter]], function(bagName, key, value, _unused, replicated)
+	Wait(0)
+	if not value then return end
+    local net = tonumber(bagName:gsub('entity:', ''), 10)
+    local bag = NetworkGetEntityFromNetworkId(net)
+	local ent = Entity(bag).state
+	stash[value.serial] = value
+	StashZone(value)
+end)
+
+Spheres = {}
+OpenInventory = function(data)
+	lib.registerContext({
+		id = 'inventory_'..data.serial,
+		title = data.label,
+		onExit = function()
+		end,
+		options = {
+			{
+				title = 'Open Inventory',
+				description = 'Open This Bag',
+				onSelect = function(args)
+					TriggerEvent('ox_inventory:openInventory', 'stash', {id = data.serial, name = data.label, slots = data.slots, weight = data.weights, coords = data.coord})
+				end,
+			},
+			{
+				title = 'Take Bag',
+				description = 'Take the '..data.label,
+				onSelect = function(args)
+					print('Pressed the button!')
+					Progress('Taking '..data.label)
+					Pickup()
+					TriggerServerEvent('renzu_bag:removeplacement',data)
+				end,
+			},
+		},
+	})
+	lib.showContext('inventory_'..data.serial)
+end
+
+Pickup = function()
+	lib.requestAnimDict('random@domestic')
+	TaskPlayAnim(PlayerPedId(), 'random@domestic', 'pickup_low', 2.0, 2.0, -1, 48, 0, false, false,false)
+end
+
+Progress = function(text)
+	lib.progressBar({
+		duration = 1000,
+		label = text..'..',
+		useWhileDead = false,
+		canCancel = true,
+		disable = {
+			car = false,
+		}
+	})
+end
+
+RegisterNetEvent('renzu_bag:removezone', function(data)
+	Spheres[data.serial]:remove()
+	if #(GetEntityCoords(cache.ped) - data.coord) < 2 then
+		lib.hideTextUI()
+	end
+end)
+
+RegisterNetEvent('renzu_bag:inventory', function(data)
+	Progress('Opening '..data.label)
+	Pickup()
+	lib.requestModel(data.model)
+	local bag = CreateObject(data.model, GetEntityCoords(cache.ped)+GetEntityForwardVector(cache.ped)*0.8, true, true)
+	while not DoesEntityExist(bag) do Wait(0) end
+	PlaceObjectOnGroundProperly(bag)
+	data.net = NetworkGetNetworkIdFromEntity(bag)
+	data.coord = GetEntityCoords(bag)
+	TriggerServerEvent('renzu_bag:placeobject',data)
+end)
+
+StashZone = function(data)
+	function onEnter(self)
+		lib.showTextUI('[E] - Open '..data.label, {
+			position = "right-center",
+			icon = 'hand',
+			style = {
+				borderRadius = 0,
+				backgroundColor = '#48BB78',
+				color = 'white'
+			}
+		})
+	end
+	
+	function onExit(self)
+		lib.hideTextUI()
+	end
+	
+	function inside(self)
+		local data = data
+		if IsControlJustPressed(0,38) then
+			print(data.serial,data.label)
+			OpenInventory(data)
+		end
+	end
+	
+	local sphere = lib.zones.sphere({
+		coords = data.coord,
+		radius = 2,
+		debug = false,
+		inside = inside,
+		onEnter = onEnter,
+		onExit = onExit
+	})
+	Spheres[data.serial] = sphere
+end
+function onEnter(self)
+	lib.showTextUI('[E] - Buy Bag', {
+		position = "right-center",
+		icon = 'hand',
+		style = {
+			borderRadius = 0,
+			backgroundColor = '#48BB78',
+			color = 'white'
+		}
+	})
+end
+
+function onExit(self)
+	lib.hideTextUI()
+end
+
+function inside(self)
+	if IsControlJustPressed(0,38) then
+		BagShop()
+	end
+end
+
+local sphere = lib.zones.sphere({
+	coords = vec3(421.69317626953,-809.66149902344,29.49114418),
+	radius = 1,
+	debug = false,
+	inside = inside,
+	onEnter = onEnter,
+	onExit = onExit
+})
+BagShop = function()
+	local options = {}
+	local secondary = {}
+	local type = {}
+	for k,v in pairs(Config.item) do
+		table.insert(options,{
+			title = v.label,
+			arrow = true,
+			description = 'Buy '..v.label..' Price: '..v.price..' Slots: '..v.slots,
+			onSelect = function(args)
+				TriggerServerEvent('buybag',v)
+			end,
+		})
+	end
+	
+	lib.registerContext({
+		id = 'buybags',
+		title = 'Buy Bags',
+		onExit = function()
+			print('Hello there')
+		end,
+		options = options
+	})
+	lib.showContext('buybags')
+end
+local blip = AddBlipForCoord(421.69317626953,-809.66149902344,29.49114)
+SetBlipSprite(blip, 642)
+SetBlipDisplay(blip, 4)
+SetBlipScale(blip, 0.8)
+SetBlipColour(blip, 3)
+SetBlipAsShortRange(blip, true)
+BeginTextCommandSetBlipName('STRING')
+AddTextComponentSubstringPlayerName('Bag Shop')
+EndTextCommandSetBlipName(blip)
