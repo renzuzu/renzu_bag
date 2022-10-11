@@ -1,6 +1,8 @@
 -- this script create or emulate stash logic to your item when its used. its unique to its Serial Number
 -- my original plan for item based stash is the ox container, but there seems no way to Create new item container from other resource yet as for now. (or educate me, its faster if container is used but there will no probably a prop when its dropped. will use the ox drop system logic)
 Config = {
+	useShop = true, -- Do you want a Shop for Bags? 
+	Shopcoord = vec3(421.69317626953,-809.66149902344,29.49114418),
 	item = { -- item based prop inventory
 		[1] = {
 			item = 'bag',

@@ -77,7 +77,9 @@ Progress = function(text)
 end
 
 RegisterNetEvent('renzu_bag:removezone', function(data)
-	Spheres[data.serial]:remove()
+	if Spheres[data.serial] then
+		Spheres[data.serial]:remove()
+	end
 	if #(GetEntityCoords(cache.ped) - data.coord) < 2 then
 		lib.hideTextUI()
 	end
@@ -152,23 +154,25 @@ function inside(self)
 	end
 end
 
-local sphere = lib.zones.sphere({
-	coords = vec3(421.69317626953,-809.66149902344,29.49114418),
-	radius = 1,
-	debug = false,
-	inside = inside,
-	onEnter = onEnter,
-	onExit = onExit
-})
+if Config.useShop then
+	local sphere = lib.zones.sphere({
+		coords = Config.Shopcoord,
+		radius = 1,
+		debug = false,
+		inside = inside,
+		onEnter = onEnter,
+		onExit = onExit
+	})
+end
 BagShop = function()
 	local options = {}
 	local secondary = {}
 	local type = {}
 	for k,v in pairs(Config.item) do
 		table.insert(options,{
-			title = v.label,
+			title = v.label.. ' - Price: '..v.price..'$',
 			arrow = true,
-			description = 'Buy '..v.label..' Price: '..v.price..' Slots: '..v.slots,
+			description = 'Buy '..v.label..' | Slots: '..v.slots,
 			onSelect = function(args)
 				TriggerServerEvent('buybag',v)
 			end,
@@ -185,8 +189,8 @@ BagShop = function()
 	})
 	lib.showContext('buybags')
 end
-local blip = AddBlipForCoord(421.69317626953,-809.66149902344,29.49114)
-SetBlipSprite(blip, 642)
+local blip = AddBlipForCoord(Config.Shopcoord)
+SetBlipSprite(blip, 586)
 SetBlipDisplay(blip, 4)
 SetBlipScale(blip, 0.8)
 SetBlipColour(blip, 3)
