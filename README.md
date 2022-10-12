@@ -1,7 +1,13 @@
 # renzu_bag
 Create item Based Stash | ESX | Ox_inventory | Ox_lib | FIVEM
 
-# Description
+# Features
+- Item Based Stashed / Inventory.
+- Unique Bags Using Serials
+- Configurable Slots and Weights for Each models in config.
+- Persistents Objects and State Bags. upon script restart or server restart ( this is like a real stash )
+- Easy to Add and Modify new model/bag in config
+Description
 - this script create or emulate stash logic to your item when its used. its unique to its Serial Number
 - my original plan for item based stash is the ox container, but there seems no way to Create new item container from other resource yet as for now. (or educate me, its faster if container is used but there will no probably a prop when its dropped. will use the ox drop system logic)
 
