@@ -5,7 +5,7 @@ Create item Based Stash | ESX | Ox_inventory | Ox_lib | FIVEM
 - Item Based Stashed / Inventory.
 - Unique Bags Using Serials
 - Configurable Slots and Weights for Each models in config.
-- Persistents Objects and State Bags. upon script restart or server restart ( this is like a real stash )
+- Persistents Objects and State Bags. upon script restart or server restart ( this is like a real stash ) this is tested in 2699 BUILD (objects are persistent even without any player)
 - Easy to Add and Modify new model/bag in config
 Description
 - this script create or emulate stash logic to your item when its used. its unique to its Serial Number
