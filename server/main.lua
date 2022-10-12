@@ -53,16 +53,23 @@ ESX.RegisterUsableItem("bag", function(source,item,data)
 	exports.ox_inventory:RemoveItem(source, item, 1, nil, data.slot)
 end)
 
+GlobalState.PersistentBags = json.decode(GetResourceKvpString('bags') or '[]') or {}
+local entities = {}
 RegisterNetEvent("renzu_bag:placeobject", function(data)
 	local source = source
 	local bag = NetworkGetEntityFromNetworkId(data.net)
 	CreateStash(data)
 	local ent = Entity(bag).state
+	entities[data.net] = bag
 	EnsureEntityStateBag(bag)
-	print(data.net,DoesEntityExist(bag))
 	data.random = os.time() -- make sure state bag is new to clients. its seems if its the same data the handler will not get the notification
 	ent:set('bag', data, true)
 	EnsureEntityStateBag(bag)
+	Wait(1000)
+	data.coord = GetEntityCoords(bag)
+	local bags = json.decode(GetResourceKvpString('bags') or '[]') or {}
+	bags[data.serial] = data
+	SetResourceKvp('bags',json.encode(bags))
 end)
 
 RegisterNetEvent("renzu_bag:removeplacement", function(data)
@@ -76,5 +83,36 @@ RegisterNetEvent("renzu_bag:removeplacement", function(data)
 		TriggerClientEvent('renzu_bag:removezone',-1,data)
 		data.src = source
 		CreateBag(data,data.serial)
+		local bags = json.decode(GetResourceKvpString('bags') or '[]') or {}
+		bags[data.serial] = nil
+		SetResourceKvp('bags',json.encode(bags))
+		entities[data.net] = nil
+	end
+end)
+
+Citizen.CreateThread(function()
+	Wait(1000)
+	local bags = GlobalState.PersistentBags
+	for k,v in pairs(bags) do
+		local bag = CreateObject(v.model, v.coord.x,v.coord.y,v.coord.z, true, true)
+		while not DoesEntityExist(bag) do Wait(0) end
+		CreateStash(v)
+		local ent = Entity(bag).state
+		local net = NetworkGetNetworkIdFromEntity(bag)
+		entities[net] = bag
+		EnsureEntityStateBag(bag)
+		v.net = net
+		v.random = os.time() -- make sure state bag is new to clients. its seems if its the same data the handler will not get the notification
+		ent:set('bag', v, true)
+	end
+end)
+
+AddEventHandler('onResourceStop', function(re)
+	if re == GetCurrentResourceName() then
+		for k,v in pairs(entities) do
+			if DoesEntityExist(NetworkGetEntityFromNetworkId(k)) then
+				DeleteEntity(NetworkGetEntityFromNetworkId(k))
+			end
+		end
 	end
 end)

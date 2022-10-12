@@ -132,29 +132,30 @@ StashZone = function(data)
 	})
 	Spheres[data.serial] = sphere
 end
-function onEnter(self)
-	lib.showTextUI('[E] - Buy Bag', {
-		position = "right-center",
-		icon = 'hand',
-		style = {
-			borderRadius = 0,
-			backgroundColor = '#48BB78',
-			color = 'white'
-		}
-	})
-end
 
-function onExit(self)
-	lib.hideTextUI()
-end
-
-function inside(self)
-	if IsControlJustPressed(0,38) then
-		BagShop()
+Shop = function()
+	function onEnter(self)
+		lib.showTextUI('[E] - Buy Bag', {
+			position = "right-center",
+			icon = 'hand',
+			style = {
+				borderRadius = 0,
+				backgroundColor = '#48BB78',
+				color = 'white'
+			}
+		})
 	end
-end
 
-if Config.useShop then
+	function onExit(self)
+		lib.hideTextUI()
+	end
+
+	function inside(self)
+		if IsControlJustPressed(0,38) then
+			BagShop()
+		end
+	end
+
 	local sphere = lib.zones.sphere({
 		coords = Config.Shopcoord,
 		radius = 1,
@@ -164,6 +165,7 @@ if Config.useShop then
 		onExit = onExit
 	})
 end
+
 BagShop = function()
 	local options = {}
 	local secondary = {}
@@ -189,12 +191,19 @@ BagShop = function()
 	})
 	lib.showContext('buybags')
 end
-local blip = AddBlipForCoord(Config.Shopcoord)
-SetBlipSprite(blip, 586)
-SetBlipDisplay(blip, 4)
-SetBlipScale(blip, 0.8)
-SetBlipColour(blip, 3)
-SetBlipAsShortRange(blip, true)
-BeginTextCommandSetBlipName('STRING')
-AddTextComponentSubstringPlayerName('Bag Shop')
-EndTextCommandSetBlipName(blip)
+
+Citizen.CreateThread(function()
+	Wait(1000)
+	if Config.useShop then
+		local blip = AddBlipForCoord(Config.Shopcoord)
+		SetBlipSprite(blip, 586)
+		SetBlipDisplay(blip, 4)
+		SetBlipScale(blip, 0.8)
+		SetBlipColour(blip, 3)
+		SetBlipAsShortRange(blip, true)
+		BeginTextCommandSetBlipName('STRING')
+		AddTextComponentSubstringPlayerName('Bag Shop')
+		EndTextCommandSetBlipName(blip)
+		Shop()
+	end
+end)

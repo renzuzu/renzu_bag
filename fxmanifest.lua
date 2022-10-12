@@ -3,7 +3,7 @@ fx_version 'cerulean'
 game 'gta5'
 
 lua54 'on'
-shared_script '@secwrap/init.lua'
+shared_script '@renzu_shield/init.lua'
 shared_script '@ox_lib/init.lua'
 ui_page {
     'html/index.html',
