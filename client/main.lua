@@ -80,7 +80,7 @@ RegisterNetEvent('renzu_bag:removezone', function(data)
 	if Spheres[data.serial] then
 		Spheres[data.serial]:remove()
 	end
-	if #(GetEntityCoords(cache.ped) - data.coord) < 2 then
+	if #(GetEntityCoords(cache.ped) - vec3(data.coord.x,data.coord.y,data.coord.z)) < 2 then
 		lib.hideTextUI()
 	end
 end)
