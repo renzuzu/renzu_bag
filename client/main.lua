@@ -5,6 +5,9 @@ Citizen.CreateThread(function()
 	player = LocalPlayer.state
 	Wait(2000)
 	loaded = ESX.PlayerLoaded
+	for k,v in pairs(Config.item) do
+		lib.requestModel(v.model) -- preload models
+	end
 end)
 
 RegisterNetEvent('esx:playerLoaded')
@@ -94,6 +97,8 @@ RegisterNetEvent('renzu_bag:inventory', function(data)
 	PlaceObjectOnGroundProperly(bag)
 	data.net = NetworkGetNetworkIdFromEntity(bag)
 	data.coord = GetEntityCoords(bag)
+	Wait(1000)
+	FreezeEntityPosition(bag,true)
 	TriggerServerEvent('renzu_bag:placeobject',data)
 end)
 

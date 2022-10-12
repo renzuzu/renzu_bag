@@ -94,7 +94,7 @@ Citizen.CreateThread(function()
 	Wait(1000)
 	local bags = GlobalState.PersistentBags
 	for k,v in pairs(bags) do
-		local bag = CreateObject(v.model, v.coord.x,v.coord.y,v.coord.z, true, true)
+		local bag = CreateObjectNoOffset(v.model, v.coord.x,v.coord.y,v.coord.z, true, true)
 		while not DoesEntityExist(bag) do Wait(0) end
 		CreateStash(v)
 		local ent = Entity(bag).state
@@ -104,6 +104,7 @@ Citizen.CreateThread(function()
 		v.net = net
 		v.random = os.time() -- make sure state bag is new to clients. its seems if its the same data the handler will not get the notification
 		ent:set('bag', v, true)
+		FreezeEntityPosition(bag,true)
 	end
 end)
 
