@@ -6,4 +6,9 @@
 	stack = false,
 	close = true,
 	description = ''
+	client = {
+		export = 'renzu_bag.useItem',
+		disable = { move = true, car = true, combat = true },
+		usetime = 1,
+	}
 },

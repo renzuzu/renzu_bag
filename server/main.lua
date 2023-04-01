@@ -17,16 +17,14 @@ CreateBag = function(data,serial)
 	  model = data.model,
 	  image = data.image
 	}
-	exports.ox_inventory:AddItem(data.src,data.item,1,metadata, false, function(success, a)
-	end)
+	exports.ox_inventory:AddItem(data.src,data.item or 'bag',1,metadata, false)
 end
   
 exports('CreateBag', function(data)
 	CreateBag(data)
 end)
   
-RegisterNetEvent('buybag', function(v)
-	local data = v
+RegisterNetEvent('buybag', function(data)
 	local money = exports.ox_inventory:GetItem(source, 'money', nil, false)
 	if money.count >= data.price then
 		data.src = source
@@ -38,37 +36,22 @@ RegisterNetEvent('buybag', function(v)
 	end
 end)
 
-ESX.RegisterUsableItem("bag", function(source,item,data)
-	local xPlayer = ESX.GetPlayerFromId(source)
-	local metadata = {
-		slots = data.metadata.slots,
-		weights = data.metadata.weights,
-		serial = data.metadata.serial,
-		label = data.metadata.label,
-		model = data.metadata.model,
-		item = item,
-		image = data.metadata.image
-	}
-	TriggerClientEvent('renzu_bag:inventory',source,metadata)
-	exports.ox_inventory:RemoveItem(source, item, 1, nil, data.slot)
-end)
-
 GlobalState.PersistentBags = json.decode(GetResourceKvpString('bags') or '[]') or {}
 local entities = {}
 RegisterNetEvent("renzu_bag:placeobject", function(data)
 	local source = source
-	local bag = NetworkGetEntityFromNetworkId(data.net)
-	CreateStash(data)
+	local bag = NetworkGetEntityFromNetworkId(data.metadata.net)
+	CreateStash(data.metadata)
 	local ent = Entity(bag).state
-	entities[data.net] = bag
+	entities[data.metadata.net] = bag
 	EnsureEntityStateBag(bag)
-	data.random = os.time() -- make sure state bag is new to clients. its seems if its the same data the handler will not get the notification
-	ent:set('bag', data, true)
+	data.metadata.random = os.time() -- make sure state bag is new to clients. its seems if its the same data the handler will not get the notification
+	ent:set('bag', data.metadata, true)
 	EnsureEntityStateBag(bag)
 	Wait(1000)
-	data.coord = GetEntityCoords(bag)
+	data.metadata.coord = GetEntityCoords(bag)
 	local bags = json.decode(GetResourceKvpString('bags') or '[]') or {}
-	bags[data.serial] = data
+	bags[data.metadata.serial] = data.metadata
 	SetResourceKvp('bags',json.encode(bags))
 end)
 

@@ -88,28 +88,45 @@ RegisterNetEvent('renzu_bag:removezone', function(data)
 	end
 end)
 
-RegisterNetEvent('renzu_bag:inventory', function(data)
-	Progress('Opening '..data.label)
-	Pickup()
-	lib.requestModel(data.model)
-	local bag = CreateObject(data.model, GetEntityCoords(cache.ped)+GetEntityForwardVector(cache.ped)*0.8, true, true)
-	while not DoesEntityExist(bag) do Wait(0) end
-	PlaceObjectOnGroundProperly(bag)
-	data.net = NetworkGetNetworkIdFromEntity(bag)
-	data.coord = GetEntityCoords(bag)
-	Wait(1000)
-	FreezeEntityPosition(bag,true)
-	TriggerServerEvent('renzu_bag:placeobject',data)
+exports('useItem', function(data, slot)
+    exports.ox_inventory:useItem(data, function(data)
+		Progress('Opening '..data.metadata.label)
+
+		Pickup()
+
+		lib.requestModel(data.metadata.model)
+
+		local bag = CreateObject(data.metadata.model, GetEntityCoords(cache.ped)+GetEntityForwardVector(cache.ped)*0.8, true, true)
+
+		while not DoesEntityExist(bag) do Wait(0) end
+
+		PlaceObjectOnGroundProperly(bag)
+
+		data.metadata.net = NetworkGetNetworkIdFromEntity(bag)
+
+		data.metadata.coord = GetEntityCoords(bag)
+
+		Wait(1000)
+		
+		FreezeEntityPosition(bag,true)
+		
+		data.item = data.name
+
+		TriggerServerEvent('renzu_bag:placeobject',data)
+	end)
 end)
 
 StashZone = function(data)
 	function onEnter(self)
 		lib.showTextUI('[E] - Open '..data.label, {
 			position = "right-center",
-			icon = 'hand',
+			icon = 'briefcase',
 			style = {
 				borderRadius = 0,
-				backgroundColor = '#48BB78',
+				backgroundColor = '#202020',
+				borderRadius = 20,
+				borderStyle = 'solid',
+				borderWidth = '1px',
 				color = 'white'
 			}
 		})
