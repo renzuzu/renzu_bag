@@ -1,6 +1,23 @@
 ESX = exports['es_extended']:getSharedObject()
+
 CreateStash = function(data)
+	CreateInventoryHooks(data.serial)
 	return exports.ox_inventory:RegisterStash(data.serial, data.label, data.slots, data.weights, false)
+end
+
+CreateInventoryHooks = function(serial)
+	local inventory = serial
+	local hookId = exports.ox_inventory:registerHook('swapItems', function(payload)
+		return false
+	end, {
+		print = false,
+		itemFilter = {
+			bag = true,
+		},
+		inventoryFilter = {
+			inventory,
+		}
+	})
 end
 
 lib.callback.register('renzu_bag:AddStash', function(source, data)
