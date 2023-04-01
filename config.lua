@@ -7,6 +7,7 @@ Config = {
 		[1] = {
 			item = 'bag',
 			slots = 20,
+			componentid = 45, -- bag componentid SetPedComponentVariation(cache.ped,5,id,0,2)
 			weights = 10000,
 			model = `ba_prop_battle_bag_01a`, -- prop model
 			label = 'Battle Bag', -- label of the item

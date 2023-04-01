@@ -32,6 +32,7 @@ CreateBag = function(data,serial)
 	  label = data.label,
 	  weights = data.weights,
 	  model = data.model,
+	  componentid = data.componentid,
 	  image = data.image
 	}
 	exports.ox_inventory:AddItem(data.src,data.item or 'bag',1,metadata, false)

@@ -88,6 +88,19 @@ RegisterNetEvent('renzu_bag:removezone', function(data)
 	end
 end)
 
+Wearbag = function(id)
+	SetPedComponentVariation(cache.ped,5,id,0,2)
+end
+
+RegisterNetEvent('renzu_bag:Wearbag', function(slot)
+	local bags = exports.ox_inventory:Search('slots', 'bag')
+	for k,v in pairs(bags) do
+		if v.slot == slot then
+			return Wearbag(v.metadata.componentid)
+		end
+	end
+end)
+
 exports('useItem', function(data, slot)
     exports.ox_inventory:useItem(data, function(data)
 		Progress('Opening '..data.metadata.label)
